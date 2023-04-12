@@ -10,26 +10,19 @@ You can assume there are 3 possible input functions: sum, fib, and factorial.
     factorial accepts a single integer n and returns 1 if n <= 1 or factorial(n - 1) * n otherwise
 */
 
-
-type Sum = (a: number, b: number) => number;
-type Fib = (n: number) => number;
-type Factorial = (a: number) => number;
-
-type Fn = Sum & Fib & Factorial;
+type Fn = (...params: [number, number?]) => number
 
 function memoize(fn: Fn): Fn {
-  let memo: Map<string, ReturnType<Fn>> = new Map();
-  return function (...args: Parameters<Fn>): ReturnType<Fn> {
-    let key: string = args.join(",");
-    const result: ReturnType<Fn> = memo.get(key) ?? fn(...args);
-    if (!memo.has(key)) {
-      memo.set(key, result);
-    }
-    return result;
-  };
+  let cache:Record<string,number> = {};
+  return function(...args:[number,number?]):number {
+    let key = args.join("-");
+    if(key in cache) return cache[key];
+    cache[key] = fn(...args);
+    return cache[key];
+  }
 }
 
-/**
+/** 
  * let callCount = 0;
  * const memoizedFn = memoize(function (a, b) {
  *	 callCount += 1;
@@ -37,7 +30,7 @@ function memoize(fn: Fn): Fn {
  * })
  * memoizedFn(2, 3) // 5
  * memoizedFn(2, 3) // 5
- * console.log(callCount) // 1
+ * console.log(callCount) // 1 
  */
 
 const sum = (a:number,b:number) => a + b;
